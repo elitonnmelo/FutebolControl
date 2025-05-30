@@ -1,20 +1,19 @@
 package TCP;
 
 import Utils.Desempacotamento;
-import model.Clube;
-import model.Partidas;
-import model.SerieA;
-import model.SerieB;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import model.Clube;
+import model.Partidas;
+import model.SerieA;
+import model.SerieB;
 
 /**
  * Classe TCP.ServidorClube - Implementa um servidor para o sistema de clubes
- * Recebe conexões de clientes e processa requisições
+ * Recebe conexões de Clubes e processa requisições
  */
 public class ServidorClube {
     private static final int PORTA = 12345;
@@ -120,16 +119,39 @@ class Connection extends Thread {
 
                 // 3. USAR O NOVO MÉTODO para desempacotar os bytes em objetos
                 System.out.println("Servidor: Desempacotando os objetos...");
-                ArrayList<Object> listaDeClientes = Desempacotamento.lerArrayDeBytes(dadosRecebidos);
+                ArrayList<Object> listaDeClubes = Desempacotamento.lerArrayDeBytes(dadosRecebidos);
 
                 // 4. Processar os dados e enviar a resposta
-                System.out.println("Servidor: " + listaDeClientes.size() + " clientes recebidos com sucesso.");
-                // Exemplo: Imprimir o nome do primeiro cliente
-                if (!listaDeClientes.isEmpty() && listaDeClientes.getFirst() instanceof Clube primeiroCliente) {
-                  System.out.println("Nome do primeiro cliente: " + primeiroCliente.getNome());
+                System.out.println("Servidor: " + listaDeClubes.size() + " Clubes recebidos com sucesso.");
+                // Exemplo: Imprimir o nome do primeiro Clube
+                if (!listaDeClubes.isEmpty() && listaDeClubes.getFirst() instanceof Clube primeiroClube) {
+                  System.out.println("Nome do primeiro Clube: " + primeiroClube.getNome());
                 }
+                // 5. Enviar a resposta de volta ao cliente
+                System.out.println("Servidor: Enviando resposta ao cliente...");
+                // Resposta personalizada
+                // 6. Enviar lista de competições que o clube participa, Exemplo: Falemnego participa da Série A, Copa do Brasil
+                StringBuilder sb = new StringBuilder();
+                for (Object obj : listaDeClubes) {
+                    if (obj instanceof Clube clube) {
+                        sb.append(clube.getNome()).append(" participa de: ");
+                        if (clube instanceof SerieA) {
+                            sb.append("Série A, ");
+                        }
+                        if (clube instanceof SerieB) {
+                            sb.append("Série B, ");
+                        }
+                        if (clube instanceof SerieA.Libertadores) {
+                            sb.append("Copa Libertadores, ");
+                        }
+                        sb.setLength(sb.length() - 2); // Remove a última vírgula e espaço
+                        sb.append(".\n");
+                    }
+                }
+                out.writeUTF(sb.toString());
 
-                String resposta = "Servidor processou " + listaDeClientes.size() + " objetos.";
+
+                String resposta = "Servidor processou " + listaDeClubes.size() + " objetos.";
                 out.writeUTF(resposta.toUpperCase());
             }
 
